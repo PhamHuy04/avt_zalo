@@ -203,7 +203,6 @@
 <button id="musicBtn" aria-label="Bật/tắt nhạc">♪</button>
 
 <script>
-
   const MUSIC_FILE = "nhac.mp3"; 
   
   const welcomeScreen = document.getElementById('welcomeScreen');
@@ -211,22 +210,31 @@
   const profileCard = document.getElementById('profileCard');
   const musicBtn = document.getElementById('musicBtn');
 
-  let audio = null;
+  let audio = new Audio();
+  audio.src = MUSIC_FILE;
+  audio.loop = true;
+  audio.volume = 0.6;
+  
+  audio.load(); 
+
   let isPlaying = false;
 
   
   openBtn.addEventListener('click', () => {
+    
     if (MUSIC_FILE) {
-      audio = new Audio(MUSIC_FILE);
-      audio.loop = true;
-      audio.volume = 0.6;
       audio.play().then(() => {
         isPlaying = true;
         musicBtn.textContent = '❚❚';
         musicBtn.classList.add('show');
-      }).catch(e => console.log("Không tìm thấy nhạc:", e));
+      }).catch(e => {
+        console.log("Lỗi phát nhạc:", e);
+        
+        musicBtn.classList.add('show');
+      });
     }
 
+    
     welcomeScreen.style.opacity = '0';
     welcomeScreen.style.transform = 'scale(1.1)';
     
@@ -236,37 +244,37 @@
     }, 800);
   });
 
-
+  
   musicBtn.addEventListener('click', () => {
-    if (!audio) return;
+    if (!MUSIC_FILE) return;
     if (isPlaying) {
-      audio.pause(); musicBtn.textContent = '♪'; isPlaying = false;
+      audio.pause(); 
+      musicBtn.textContent = '♪'; 
+      isPlaying = false;
     } else {
-      audio.play(); musicBtn.textContent = '❚❚'; isPlaying = true;
+      audio.play().then(() => {
+        musicBtn.textContent = '❚❚'; 
+        isPlaying = true;
+      }); 
     }
   });
 
-
-  
   
   document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
   });
 
-  
   document.addEventListener('dragstart', function(e) {
     if (e.target.nodeName === 'IMG') {
       e.preventDefault();
     }
   });
 
-  
   document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P')) {
       e.preventDefault();
     }
   });
-
 
   const avatarImg = document.querySelector('.avatar-frame img');
   if (avatarImg) {
