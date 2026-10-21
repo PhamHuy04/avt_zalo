@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System_Profile // Access Granted</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-cyan: #00f3ff;
+    --neon-pink: #ff00ea;
+    --neon-green: #00ff66;
+    --bg-dark: #050508;
+    --panel-bg: rgba(10, 10, 15, 0.7);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background-color: var(--bg-dark);
+    background-image: 
+      linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+    
+    /* Chặn bôi đen văn bản */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+  }
+
+  /* Hiệu ứng nhiễu màn hình (Scanline) */
+  body::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+  }
+
+  /* ------ MÀN HÌNH CHỜ ------ */
+  #welcomeScreen {
+    position: fixed; inset: 0; background: var(--bg-dark); z-index: 10000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .hacker-text {
+    font-family: 'Orbitron', sans-serif; color: var(--neon-green); font-size: 14px;
+    margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; animation: blink 1s infinite alternate;
+  }
+
+  #openBtn {
+    margin-top: 30px; padding: 18px 50px; font-size: 20px; font-family: 'Orbitron', sans-serif;
+    font-weight: 900; color: var(--bg-dark); background: var(--neon-cyan); border: none;
+    border-radius: 4px; cursor: pointer; box-shadow: 0 0 15px var(--neon-cyan), inset 0 0 10px rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+
+  #openBtn:hover {
+    background: #fff; box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-pink); transform: scale(1.05);
+  }
+
+  #openBtn::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); transition: 0.5s;
+  }
+
+  #openBtn:hover::before { left: 100%; }
+
+  @keyframes blink { from { opacity: 1; } to { opacity: 0.3; } }
+
+  /* ------ THẺ PROFILE CHÍNH ------ */
+  .cyber-card {
+    position: relative; width: 100%; max-width: 420px; background: var(--panel-bg);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 16px; padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.05);
+    transform: translateY(50px); opacity: 0; transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .cyber-card.active { transform: translateY(0); opacity: 1; }
+
+  .cyber-card::before, .cyber-card::after {
+    content: ''; position: absolute; width: 30px; height: 30px; border: 2px solid var(--neon-cyan); pointer-events: none;
+  }
+  .cyber-card::before { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+  .cyber-card::after { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+  /* Khung ảnh Avatar - PHẦN BẢO VỆ ẢNH */
+  .avatar-frame {
+    position: relative; width: 180px; height: 180px; margin: 0 auto 25px;
+    border-radius: 50%; padding: 4px; background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+  }
+
+  .avatar-frame img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+    filter: contrast(1.1) brightness(1.1);
+    
+    /* CHỐNG KÉO THẢ VÀ CHỌN ẢNH */
+    pointer-events: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-select: none;
+  }
+
+  .avatar-frame::after {
+    content: ''; position: absolute; inset: -10px; border-radius: 50%;
+    border: 2px dashed var(--neon-pink); animation: rotate 10s linear infinite; opacity: 0.5;
+    pointer-events: none;
+  }
+
+  @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+  /* Chữ */
+  .name {
+    font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 2px;
+    text-transform: uppercase; color: #fff; text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+    margin-bottom: 5px;
+  }
+
+  .role {
+    font-size: 13px; color: var(--neon-pink); letter-spacing: 4px; text-transform: uppercase;
+    margin-bottom: 25px; font-weight: 700;
+  }
+
+  .bio {
+    font-size: 15px; line-height: 1.8; color: #a0a0b0; margin-bottom: 30px;
+    border-left: 3px solid var(--neon-cyan); padding-left: 15px; text-align: left;
+    background: linear-gradient(90deg, rgba(0,243,255,0.05) 0%, transparent 100%);
+  }
+
+  /* Nút liên hệ */
+  .links { display: flex; justify-content: center; gap: 15px; }
+
+  .links a {
+    text-decoration: none; color: var(--neon-cyan); font-family: 'Orbitron', sans-serif;
+    font-size: 13px; padding: 10px 20px; border: 1px solid var(--neon-cyan); border-radius: 4px;
+    transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; background: rgba(0, 243, 255, 0.05);
+  }
+
+  .links a:hover { background: var(--neon-cyan); color: var(--bg-dark); box-shadow: 0 0 15px var(--neon-cyan); }
+
+  /* Nút nhạc */
+  #musicBtn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 100; width: 45px; height: 45px;
+    border: 1px solid var(--neon-cyan); background: rgba(0, 0, 0, 0.5); color: var(--neon-cyan);
+    font-size: 18px; border-radius: 8px; cursor: pointer; display: none;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); transition: all 0.3s;
+  }
+  #musicBtn:hover { background: var(--neon-cyan); color: var(--bg-dark); }
+  #musicBtn.show { display: block; }
+
+</style>
+</head>
+<body>
+
+<!-- MÀN HÌNH CHỜ -->
+<div id="welcomeScreen">
+  <div class="hacker-text">> Initializing System...</div>
+  <div class="hacker-text" style="color: var(--neon-pink);">> Loading...</div>
+  <button id="openBtn">Truy Cập</button>
+</div>
+
+<!-- NỘI DUNG CHÍNH -->
+<div class="cyber-card" id="profileCard">
+  <div class="avatar-frame">
+    <!-- ẢNH CỦA BẠN -->
+    <img src="avatar.jpg" alt="Avatar" oncontextmenu="return false;">
+  </div>
+  
+  <h1 class="name">Phạm Huy</h1>
+  <div class="role">// GM //</div>
+  
+  <p class="bio">
+    Welcome.
+  </p>
+  
+  <div class="links">
+    <a href="#" target="_blank">Facebook</a>
+    <a href="#" target="_blank">G</a>
+  </div>
+</div>
+
+<button id="musicBtn" aria-label="Bật/tắt nhạc">♪</button>
+
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     CẤU HÌNH NHẠC
+     ═══════════════════════════════════════════════════════════ */
+  const MUSIC_FILE = "nhac.mp3"; 
+  
+  const welcomeScreen = document.getElementById('welcomeScreen');
+  const openBtn = document.getElementById('openBtn');
+  const profileCard = document.getElementById('profileCard');
+  const musicBtn = document.getElementById('musicBtn');
+
+  let audio = null;
+  let isPlaying = false;
+
+  // Xử lý khi bấm nút "Truy Cập"
+  openBtn.addEventListener('click', () => {
+    if (MUSIC_FILE) {
+      audio = new Audio(MUSIC_FILE);
+      audio.loop = true;
+      audio.volume = 0.6;
+      audio.play().then(() => {
+        isPlaying = true;
+        musicBtn.textContent = '❚❚';
+        musicBtn.classList.add('show');
+      }).catch(e => console.log("Không tìm thấy nhạc:", e));
+    }
+
+    welcomeScreen.style.opacity = '0';
+    welcomeScreen.style.transform = 'scale(1.1)';
+    
+    setTimeout(() => {
+      welcomeScreen.remove();
+      profileCard.classList.add('active');
+    }, 800);
+  });
+
+  // Nút bật/tắt nhạc
+  musicBtn.addEventListener('click', () => {
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause(); musicBtn.textContent = '♪'; isPlaying = false;
+    } else {
+      audio.play(); musicBtn.textContent = '❚❚'; isPlaying = true;
+    }
+  });
+
+  /* ═══════════════════════════════════════════════════════════
+     BẢO VỆ ẢNH (CHỐNG CHUỘT PHẢI, KÉO THẢ, NHẤN GIỮ)
+     ═══════════════════════════════════════════════════════════ */
+  
+  // 1. Chặn sự kiện chuột phải (Menu ngữ cảnh) trên toàn bộ trang web
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  // 2. Chặn sự kiện kéo thả ảnh
+  document.addEventListener('dragstart', function(e) {
+    if (e.target.nodeName === 'IMG') {
+      e.preventDefault();
+    }
+  });
+
+  // 3. Chặn phím tắt lưu trang (Ctrl+S / Cmd+S) và in trang (Ctrl+P)
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P')) {
+      e.preventDefault();
+    }
+  });
+
+  // 4. Chặn thao tác nhấn giữ để lưu ảnh trên điện thoại (Mobile)
+  const avatarImg = document.querySelector('.avatar-frame img');
+  if (avatarImg) {
+    avatarImg.addEventListener('touchstart', function(e) {
+      e.preventDefault(); // Ngăn menu lưu ảnh bật lên
+    }, { passive: false });
+  }
+</script>
+
+</body>
+</html>
